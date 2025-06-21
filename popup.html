@@ -1,27 +1,189 @@
 <!DOCTYPE html>
 <html>
-<head><title>Overlay Config</title></head>
+<head>
+  <title>Overlay Config</title>
+  <style>
+    body {
+      min-width: 340px;
+      min-height: 480px;
+      margin: 0;
+      padding: 0;
+      background: rgba(30, 30, 40, 0.92);
+      color: #fff;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      box-sizing: border-box;
+    }
+    .center-container {
+      background: rgba(44, 44, 60, 0.85);
+      border-radius: 18px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+      padding: 32px 28px 24px 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 340px;
+      gap: 18px;
+    }
+    h3 {
+      margin: 0 0 10px 0;
+      font-weight: 600;
+      letter-spacing: 1px;
+      font-size: 1.3em;
+      color: #fff;
+      opacity: 0.92;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+      align-items: center;
+    }
+    label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1em;
+      opacity: 0.92;
+    }
+    input[type="number"], select, input[type="color"] {
+      border: none;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 1em;
+      background: rgba(255,255,255,0.12);
+      color: #fff;
+      outline: none;
+      margin-left: 4px;
+    }
+    input[type="color"] {
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      border: 2px solid #fff2;
+      background: none;
+      cursor: pointer;
+    }
+    button, .quick-color-btn {
+      background: rgba(255,255,255,0.13);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 7px 16px;
+      font-size: 1em;
+      margin-top: 4px;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      opacity: 0.92;
+    }
+    button:hover, .quick-color-btn:hover {
+      background: rgba(255,255,255,0.22);
+      opacity: 1;
+    }
+    #linesList {
+      width: 100%;
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .line-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255,255,255,0.07);
+      border-radius: 8px;
+      padding: 7px 10px;
+      gap: 10px;
+      font-size: 0.98em;
+      color: #fff;
+      opacity: 0.95;
+    }
+    .line-symbol {
+      font-size: 1.2em;
+      margin-right: 6px;
+      opacity: 0.7;
+    }
+    .quick-color-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid #fff2;
+      margin: 0 2px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+      transition: border 0.2s;
+    }
+    .quick-color-btn.selected {
+      border: 2px solid #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    }
+    #colorSection {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    #quickColors {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+      margin-bottom: 4px;
+    }
+    #colorPickerBtn {
+      margin-top: 2px;
+      background: rgba(255,255,255,0.10);
+      color: #fff;
+      border: 1px solid #fff2;
+      border-radius: 8px;
+      padding: 5px 12px;
+      font-size: 0.98em;
+      cursor: pointer;
+      opacity: 0.85;
+    }
+    #colorPickerBtn:hover {
+      background: rgba(255,255,255,0.18);
+      opacity: 1;
+    }
+    ::selection {
+      background: #fff2;
+    }
+  </style>
+</head>
 <body>
-  <h3>Line Config</h3>
-  <form id="lineForm">
-    <label>Type:
-      <select name="type">
-        <option value="vertical">Vertical</option>
-        <option value="horizontal">Horizontal</option>
-      </select>
-    </label><br/>
-    <label>Position (px): <input type="number" name="position" required></label><br/>
-    <label>Color: <input type="color" name="color" value="#ff0000"></label><br/>
-    <label>Thickness (px): <input type="number" name="thickness" value="2"></label><br/>
-    <button type="submit">Add Line</button>
-  </form>
-  <button id="clear">Clear All</button>
-  <div id="linesList"></div>
-  <div id="colorSection">
-    <strong>Quick Colors:</strong>
-    <div id="quickColors" style="margin: 6px 0; display: flex; gap: 6px;"></div>
-    <button type="button" id="colorPickerBtn">Choose from spectrum</button>
-    <input type="color" id="spectrumColor" style="display:none;">
+  <div class="center-container">
+    <h3>Overlay Config</h3>
+    <form id="lineForm">
+      <label><span class="line-symbol">↕️</span>Type:
+        <select name="type">
+          <option value="vertical">Vertical</option>
+          <option value="horizontal">Horizontal</option>
+        </select>
+      </label>
+      <label><span class="line-symbol">📏</span>Position (px): <input type="number" name="position" required></label>
+      <label><span class="line-symbol">🎨</span>Color: <input type="color" name="color" value="#ff0000"></label>
+      <label><span class="line-symbol">⬛</span>Thickness (px): <input type="number" name="thickness" value="2"></label>
+      <button type="submit">➕ Add Line</button>
+    </form>
+    <button id="clear">🗑️ Clear All</button>
+    <div id="linesList"></div>
+    <div id="colorSection">
+      <strong>Quick Colors:</strong>
+      <div id="quickColors"></div>
+      <button type="button" id="colorPickerBtn">🌈 Choose from spectrum</button>
+      <input type="color" id="spectrumColor" style="display:none;">
+    </div>
   </div>
   <script src="popup.js"></script>
 </body>
