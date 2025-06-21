@@ -1,0 +1,30 @@
+# macOS system files
+.DS_Store
+
+# Node.js dependencies
+node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# VSCode settings
+.vscode/
+
+# Chrome extension build artifacts (if any)
+dist/
+build/
+
+# OS/Editor swap files
+*.swp
+*.swo
+
+# Misc
+*.log
+
+# Ignore zipped extension packages
+*.zip
+*.crx
+.idea
+
