@@ -188,16 +188,16 @@
       <label class="right-align-label"><span class="line-symbol">📏</span>Position (px): <input type="number" name="position" required></label>
       <label class="right-align-label"><span class="line-symbol">🎨</span>Color: <input type="color" name="color" value="#ff0000"></label>
       <label class="right-align-label" style="justify-content:flex-start;text-align:left;"><span class="line-symbol">⬛</span>Thickness (px): <input type="number" name="thickness" value="2"></label>
-      <div style="display: flex; gap: 10px; width: 100%; justify-content: center;">
-        <button type="submit">➕ Add Line</button>
-        <button id="clear" type="button">🗑️ Clear All</button>
-      </div>
     </form>
     <div id="colorSection">
       <strong>Quick Colors:</strong>
       <div id="quickColors"></div>
       <button type="button" id="colorPickerBtn">🌈 Choose from spectrum</button>
       <input type="color" id="spectrumColor" style="display:none;">
+    </div>
+    <div style="display: flex; gap: 10px; width: 100%; justify-content: center; margin-top: 8px;">
+      <button type="submit" form="lineForm">➕ Add Line</button>
+      <button id="clear" type="button">🗑️ Clear All</button>
     </div>
     <div id="linesList"></div>
   </div>
