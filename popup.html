@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head><title>Overlay Config</title></head>
+<body>
+  <h3>Line Config</h3>
+  <form id="lineForm">
+    <label>Type:
+      <select name="type">
+        <option value="vertical">Vertical</option>
+        <option value="horizontal">Horizontal</option>
+      </select>
+    </label><br/>
+    <label>Position (px): <input type="number" name="position" required></label><br/>
+    <label>Color: <input type="color" name="color" value="#ff0000"></label><br/>
+    <label>Thickness (px): <input type="number" name="thickness" value="2"></label><br/>
+    <button type="submit">Add Line</button>
+  </form>
+  <button id="clear">Clear All</button>
+  <script src="popup.js"></script>
+</body>
+</html>

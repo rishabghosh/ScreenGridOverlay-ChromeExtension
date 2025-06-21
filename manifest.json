@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "Screen Grid Overlay",
+  "version": "1.0",
+  "description": "Draws configurable vertical and horizontal lines over all websites.",
+  "permissions": ["storage", "scripting", "activeTab"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [{
+    "matches": ["<all_urls>"],
+    "js": ["content.js"]
+  }]
+}
