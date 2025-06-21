@@ -17,7 +17,7 @@ This Chrome extension lets you draw configurable vertical and horizontal lines o
   - **Type** (vertical or horizontal)
   - **Position** (in pixels)
   - **Thickness** (in pixels)
-  - **Color** (choose from quick colors, spectrum, or enter a hex code)
+  - **Color** (choose from quick colors)
 - All added lines are listed at the bottom of the popup. You can:
   - **Hide/Show** any line independently
   - **Remove** any line
@@ -28,10 +28,11 @@ This Chrome extension lets you draw configurable vertical and horizontal lines o
 
 - Overlay lines on every website, across all tabs
 - Modern, centered, and semi-transparent UI
-- Quick color selection, full spectrum picker, and hex code input
+- Quick color selection and hex code input
 - Manage, hide, or remove lines individually
 - No page refresh required for updates
 
 ---
 
 For any issues or suggestions, feel free to contribute or open an issue!
+
