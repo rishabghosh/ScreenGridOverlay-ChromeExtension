@@ -110,14 +110,10 @@ function renderLinesList() {
 const quickColors = [
   '#ff0000', // Red
   '#00ff00', // Green
-  '#0000ff', // Blue
   '#ffff00', // Yellow
   '#00ffff', // Cyan
   '#ff00ff', // Magenta
-  '#000000', // Black
-  '#ffffff', // White
-  '#ffa500', // Orange
-  '#808080'  // Gray
+  '#ffa500'  // Orange
 ];
 
 window.addEventListener('DOMContentLoaded', () => {
