@@ -150,5 +150,16 @@ window.addEventListener('DOMContentLoaded', () => {
   };
 });
 
+// Collapsible for added lines
+const toggleBtn = document.getElementById('toggleLinesList');
+const collapsibleContent = document.getElementById('collapsibleLinesList');
+let collapsed = false;
+
+toggleBtn.addEventListener('click', () => {
+  collapsed = !collapsed;
+  toggleBtn.classList.toggle('collapsed', collapsed);
+  collapsibleContent.classList.toggle('collapsed', collapsed);
+});
+
 // Call renderLinesList on popup open
 renderLinesList();
