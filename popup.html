@@ -165,18 +165,22 @@
   <div class="center-container">
     <h3>Overlay Config</h3>
     <form id="lineForm">
-      <label><span class="line-symbol">↕️</span>Type:
-        <select name="type">
-          <option value="vertical">Vertical</option>
-          <option value="horizontal">Horizontal</option>
-        </select>
-      </label>
+      <div style="display: flex; align-items: center; gap: 16px; width: 100%; justify-content: center;">
+        <label><span class="line-symbol">↕️</span>
+          <input type="radio" name="type" value="vertical" checked style="accent-color:#fff;"> Vertical
+        </label>
+        <label><span class="line-symbol">↔️</span>
+          <input type="radio" name="type" value="horizontal" style="accent-color:#fff;"> Horizontal
+        </label>
+      </div>
       <label><span class="line-symbol">📏</span>Position (px): <input type="number" name="position" required></label>
       <label><span class="line-symbol">🎨</span>Color: <input type="color" name="color" value="#ff0000"></label>
       <label><span class="line-symbol">⬛</span>Thickness (px): <input type="number" name="thickness" value="2"></label>
-      <button type="submit">➕ Add Line</button>
+      <div style="display: flex; gap: 10px; width: 100%; justify-content: center;">
+        <button type="submit">➕ Add Line</button>
+        <button id="clear" type="button">🗑️ Clear All</button>
+      </div>
     </form>
-    <button id="clear">🗑️ Clear All</button>
     <div id="linesList"></div>
     <div id="colorSection">
       <strong>Quick Colors:</strong>
