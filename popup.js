@@ -106,5 +106,49 @@ function renderLinesList() {
   });
 }
 
+// --- Quick Colors and Spectrum Picker ---
+const quickColors = [
+  '#ff0000', // Red
+  '#00ff00', // Green
+  '#0000ff', // Blue
+  '#ffff00', // Yellow
+  '#00ffff', // Cyan
+  '#ff00ff', // Magenta
+  '#000000', // Black
+  '#ffffff', // White
+  '#ffa500', // Orange
+  '#808080'  // Gray
+];
+
+window.addEventListener('DOMContentLoaded', () => {
+  const quickColorsDiv = document.getElementById('quickColors');
+  const colorInput = document.querySelector('input[name="color"]');
+  quickColors.forEach(color => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.style.background = color;
+    btn.style.width = '24px';
+    btn.style.height = '24px';
+    btn.style.border = '1px solid #ccc';
+    btn.style.borderRadius = '4px';
+    btn.style.cursor = 'pointer';
+    btn.title = color;
+    btn.onclick = () => {
+      colorInput.value = color;
+    };
+    quickColorsDiv.appendChild(btn);
+  });
+
+  // Spectrum picker
+  const colorPickerBtn = document.getElementById('colorPickerBtn');
+  const spectrumColor = document.getElementById('spectrumColor');
+  colorPickerBtn.onclick = () => {
+    spectrumColor.click();
+  };
+  spectrumColor.oninput = (e) => {
+    colorInput.value = e.target.value;
+  };
+});
+
 // Call renderLinesList on popup open
 renderLinesList();
