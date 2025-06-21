@@ -106,6 +106,19 @@ function renderLinesList() {
   });
 }
 
+document.getElementById("toggleAll").addEventListener("click", function() {
+  chrome.storage.sync.get(["lines"], (data) => {
+    const lines = data.lines || [];
+    const allHidden = lines.length > 0 && lines.every(line => line.hidden);
+    lines.forEach(line => line.hidden = !allHidden);
+    chrome.storage.sync.set({ lines }, () => {
+      injectContentScript();
+      renderLinesList();
+      this.textContent = allHidden ? "🙈 Hide All" : "👁️ Show All";
+    });
+  });
+});
+
 // --- Quick Colors and Spectrum Picker ---
 const quickColors = [
   '#ff0000', // Red
@@ -144,6 +157,14 @@ window.addEventListener('DOMContentLoaded', () => {
   spectrumColor.oninput = (e) => {
     colorInput.value = e.target.value;
   };
+
+  // Set initial toggleAll button state
+  const toggleAllBtn = document.getElementById('toggleAll');
+  chrome.storage.sync.get(["lines"], (data) => {
+    const lines = data.lines || [];
+    const allHidden = lines.length > 0 && lines.every(line => line.hidden);
+    toggleAllBtn.textContent = allHidden ? "👁️ Show All" : "🙈 Hide All";
+  });
 });
 
 // Collapsible for added lines
