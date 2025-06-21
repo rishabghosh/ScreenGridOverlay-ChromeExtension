@@ -176,17 +176,18 @@
   <div class="center-container">
     <h3>Overlay Config</h3>
     <form id="lineForm">
-      <div style="display: flex; align-items: center; gap: 16px; width: 100%; justify-content: center;">
-        <label><span class="line-symbol">↕️</span>
+      <div style="width:100%;display:flex;align-items:center;gap:16px;justify-content:flex-start;margin-bottom:2px;">
+        <label style="margin:0;opacity:0.92;"><span class="line-symbol">🔠</span>Type:</label>
+        <label style="margin:0 0 0 12px;"><span class="line-symbol">↕️</span>
           <input type="radio" name="type" value="vertical" checked style="accent-color:#fff;"> Vertical
         </label>
-        <label><span class="line-symbol">↔️</span>
+        <label style="margin:0 0 0 8px;"><span class="line-symbol">↔️</span>
           <input type="radio" name="type" value="horizontal" style="accent-color:#fff;"> Horizontal
         </label>
       </div>
       <label class="right-align-label"><span class="line-symbol">📏</span>Position (px): <input type="number" name="position" required></label>
       <label class="right-align-label"><span class="line-symbol">🎨</span>Color: <input type="color" name="color" value="#ff0000"></label>
-      <label><span class="line-symbol">⬛</span>Thickness (px): <input type="number" name="thickness" value="2"></label>
+      <label class="right-align-label" style="justify-content:flex-start;text-align:left;"><span class="line-symbol">⬛</span>Thickness (px): <input type="number" name="thickness" value="2"></label>
       <div style="display: flex; gap: 10px; width: 100%; justify-content: center;">
         <button type="submit">➕ Add Line</button>
         <button id="clear" type="button">🗑️ Clear All</button>
