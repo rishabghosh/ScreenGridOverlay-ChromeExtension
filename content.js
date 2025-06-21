@@ -1,8 +1,15 @@
 // Draw stored lines on every page
 chrome.storage.sync.get(["lines"], (data) => {
   const lines = data.lines || [];
+  drawLines(lines);
+});
+
+function drawLines(lines) {
+  document.querySelectorAll('.screen-grid-overlay-line').forEach(el => el.remove());
   lines.forEach(line => {
+    if (line.hidden) return; // skip hidden lines
     const div = document.createElement('div');
+    div.className = 'screen-grid-overlay-line';
     div.style.position = 'fixed';
     div.style.backgroundColor = line.color;
     div.style.zIndex = 999999;
@@ -19,4 +26,4 @@ chrome.storage.sync.get(["lines"], (data) => {
     }
     document.body.appendChild(div);
   });
-});
+}

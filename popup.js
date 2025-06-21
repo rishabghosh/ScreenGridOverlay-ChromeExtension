@@ -5,23 +5,26 @@ document.getElementById("lineForm").addEventListener("submit", function(e) {
     type: form.type.value,
     position: parseInt(form.position.value),
     color: form.color.value,
-    thickness: parseInt(form.thickness.value)
+    thickness: parseInt(form.thickness.value),
+    hidden: false // new lines will be visible by default
   };
 
   chrome.storage.sync.get(["lines"], (data) => {
     const lines = data.lines || [];
     lines.push(line);
     chrome.storage.sync.set({ lines }, () => {
-      showNotification("Line added. Refresh the tab to see changes.");
+      showNotification("Line added!");
       injectContentScript();
+      renderLinesList();
     });
   });
 });
 
 document.getElementById("clear").addEventListener("click", () => {
   chrome.storage.sync.set({ lines: [] }, () => {
-    showNotification("All lines cleared. Refresh the tab.");
+    showNotification("All lines cleared!");
     injectContentScript();
+    renderLinesList();
   });
 });
 
@@ -55,3 +58,53 @@ function showNotification(message) {
   document.body.appendChild(notif);
   setTimeout(() => notif.remove(), 2000);
 }
+
+// Render the list of lines with remove/hide controls
+function renderLinesList() {
+  chrome.storage.sync.get(["lines"], (data) => {
+    const lines = data.lines || [];
+    const listDiv = document.getElementById("linesList");
+    listDiv.innerHTML = '';
+    if (lines.length === 0) {
+      listDiv.textContent = 'No lines added.';
+      return;
+    }
+    lines.forEach((line, idx) => {
+      const lineDiv = document.createElement('div');
+      lineDiv.style.display = 'flex';
+      lineDiv.style.alignItems = 'center';
+      lineDiv.style.margin = '4px 0';
+      lineDiv.style.gap = '8px';
+      lineDiv.innerHTML = `
+        <span style="width:16px;height:16px;display:inline-block;background:${line.color};border-radius:2px;"></span>
+        <span>${line.type} @ ${line.position}px, ${line.thickness}px</span>
+      `;
+      // Hide/Show button
+      const hideBtn = document.createElement('button');
+      hideBtn.textContent = line.hidden ? 'Show' : 'Hide';
+      hideBtn.onclick = () => {
+        lines[idx].hidden = !lines[idx].hidden;
+        chrome.storage.sync.set({ lines }, () => {
+          injectContentScript();
+          renderLinesList();
+        });
+      };
+      // Remove button
+      const removeBtn = document.createElement('button');
+      removeBtn.textContent = 'Remove';
+      removeBtn.onclick = () => {
+        lines.splice(idx, 1);
+        chrome.storage.sync.set({ lines }, () => {
+          injectContentScript();
+          renderLinesList();
+        });
+      };
+      lineDiv.appendChild(hideBtn);
+      lineDiv.appendChild(removeBtn);
+      listDiv.appendChild(lineDiv);
+    });
+  });
+}
+
+// Call renderLinesList on popup open
+renderLinesList();
