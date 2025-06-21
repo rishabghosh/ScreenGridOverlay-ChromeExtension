@@ -13,6 +13,7 @@ document.getElementById("lineForm").addEventListener("submit", function(e) {
     lines.push(line);
     chrome.storage.sync.set({ lines }, () => {
       alert("Line added. Refresh the tab to see changes.");
+      injectContentScript();
     });
   });
 });
@@ -20,5 +21,19 @@ document.getElementById("lineForm").addEventListener("submit", function(e) {
 document.getElementById("clear").addEventListener("click", () => {
   chrome.storage.sync.set({ lines: [] }, () => {
     alert("All lines cleared. Refresh the tab.");
+    injectContentScript();
   });
 });
+
+function injectContentScript() {
+  if (chrome.scripting && chrome.tabs) {
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+      if (tabs[0]) {
+        chrome.scripting.executeScript({
+          target: {tabId: tabs[0].id},
+          files: ["content.js"]
+        });
+      }
+    });
+  }
+}
