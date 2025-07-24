@@ -150,10 +150,22 @@ function renderLinesList() {
       toggleBtn.style.border = 'none';
       toggleBtn.style.cursor = 'pointer';
       toggleBtn.onclick = () => {
-        groupVisibility[groupName] = !visible;
-        chrome.storage.sync.set({ groupVisibility }, () => {
-          injectContentScript();
-          renderLinesList();
+        // Toggle group visibility and update hidden property for all lines in the group
+        chrome.storage.sync.get(["lines", "groupVisibility"], (data) => {
+          const lines = data.lines || [];
+          const groupVisibility = data.groupVisibility || {};
+          const newVisible = !visible;
+          groupVisibility[groupName] = newVisible;
+          // Set hidden property for all lines in this group
+          lines.forEach(line => {
+            if ((line.group || 'Ungrouped') === groupName) {
+              line.hidden = !newVisible;
+            }
+          });
+          chrome.storage.sync.set({ lines, groupVisibility }, () => {
+            injectContentScript();
+            renderLinesList();
+          });
         });
       };
       header.appendChild(toggleBtn);
