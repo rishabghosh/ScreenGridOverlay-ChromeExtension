@@ -6,6 +6,7 @@ document.getElementById("lineForm").addEventListener("submit", function(e) {
     position: parseInt(form.position.value),
     color: form.color.value,
     thickness: parseInt(form.thickness.value),
+    group: form.group.value.trim() || 'Ungrouped', // Save group info, default to 'Ungrouped'
     hidden: false // new lines will be visible by default
   };
 
@@ -61,47 +62,122 @@ function showNotification(message) {
 
 // Render the list of lines with remove/hide controls
 function renderLinesList() {
-  chrome.storage.sync.get(["lines"], (data) => {
+  chrome.storage.sync.get(["lines", "groupVisibility"], (data) => {
     const lines = data.lines || [];
+    const groupVisibility = data.groupVisibility || {};
     const listDiv = document.getElementById("linesList");
     listDiv.innerHTML = '';
     if (lines.length === 0) {
       listDiv.textContent = 'No lines added.';
       return;
     }
+    // Group lines by group name
+    const groups = {};
     lines.forEach((line, idx) => {
-      const lineDiv = document.createElement('div');
-      lineDiv.style.display = 'flex';
-      lineDiv.style.alignItems = 'center';
-      lineDiv.style.margin = '4px 0';
-      lineDiv.style.gap = '8px';
-      lineDiv.innerHTML = `
-        <span style="width:16px;height:16px;display:inline-block;background:${line.color};border-radius:2px;"></span>
-        <span>${line.type} @ ${line.position}px, ${line.thickness}px</span>
-      `;
-      // Hide/Show button
-      const hideBtn = document.createElement('button');
-      hideBtn.textContent = line.hidden ? 'Show' : 'Hide';
-      hideBtn.onclick = () => {
-        lines[idx].hidden = !lines[idx].hidden;
-        chrome.storage.sync.set({ lines }, () => {
+      const group = line.group || 'Ungrouped';
+      if (!groups[group]) groups[group] = [];
+      groups[group].push({ ...line, idx });
+    });
+    // Remove the 'Added Lines' row/collapsible from the popup UI
+    // (No code needed here, just don't render any extra row above the groups)
+    Object.keys(groups).forEach(groupName => {
+      const groupDiv = document.createElement('div');
+      groupDiv.style.marginBottom = '10px';
+      // Group header with icons
+      const header = document.createElement('div');
+      header.style.display = 'flex';
+      header.style.alignItems = 'center';
+      header.style.justifyContent = 'space-between';
+      header.style.fontWeight = 'bold';
+      header.style.marginBottom = '4px';
+      // Group name and rename/show/hide as icons
+      const groupNameSpan = document.createElement('span');
+      groupNameSpan.textContent = groupName;
+      groupNameSpan.style.marginRight = '8px';
+      header.appendChild(groupNameSpan);
+      // Rename icon button
+      const renameBtn = document.createElement('button');
+      renameBtn.innerHTML = '<span title="Rename group" style="font-size:1.1em;">✏️</span>';
+      renameBtn.style.background = 'none';
+      renameBtn.style.border = 'none';
+      renameBtn.style.cursor = 'pointer';
+      renameBtn.style.marginRight = '4px';
+      renameBtn.onclick = () => {
+        const newName = prompt('Rename group:', groupName);
+        if (newName && newName.trim() && newName !== groupName) {
+          chrome.storage.sync.get(["lines", "groupVisibility"], (data) => {
+            const lines = data.lines || [];
+            const groupVisibility = data.groupVisibility || {};
+            lines.forEach(line => {
+              if ((line.group || 'Ungrouped') === groupName) {
+                line.group = newName.trim();
+              }
+            });
+            if (groupVisibility[groupName] !== undefined) {
+              groupVisibility[newName.trim()] = groupVisibility[groupName];
+              delete groupVisibility[groupName];
+            }
+            chrome.storage.sync.set({ lines, groupVisibility }, () => {
+              injectContentScript();
+              renderLinesList();
+            });
+          });
+        }
+      };
+      header.appendChild(renameBtn);
+      // Show/hide icon button
+      const toggleBtn = document.createElement('button');
+      const visible = groupVisibility[groupName] !== false;
+      toggleBtn.innerHTML = visible
+        ? '<span title="Hide group" style="font-size:1.1em;">🙈</span>'
+        : '<span title="Show group" style="font-size:1.1em;">👁️</span>';
+      toggleBtn.style.background = 'none';
+      toggleBtn.style.border = 'none';
+      toggleBtn.style.cursor = 'pointer';
+      toggleBtn.onclick = () => {
+        groupVisibility[groupName] = !visible;
+        chrome.storage.sync.set({ groupVisibility }, () => {
           injectContentScript();
           renderLinesList();
         });
       };
-      // Remove button
-      const removeBtn = document.createElement('button');
-      removeBtn.textContent = 'Remove';
-      removeBtn.onclick = () => {
-        lines.splice(idx, 1);
-        chrome.storage.sync.set({ lines }, () => {
-          injectContentScript();
-          renderLinesList();
+      header.appendChild(toggleBtn);
+      groupDiv.appendChild(header);
+      // Always show all lines in visible groups
+      if (visible) {
+        groups[groupName].forEach(({ idx, ...line }) => {
+          const lineDiv = document.createElement('div');
+          lineDiv.className = 'line-item';
+          lineDiv.innerHTML = `
+            <span style="width:16px;height:16px;display:inline-block;background:${line.color};border-radius:2px;"></span>
+            <span>${line.type} @ ${line.position}px, ${line.thickness}px</span>
+          `;
+          // Hide/Show button
+          const hideBtn = document.createElement('button');
+          hideBtn.textContent = line.hidden ? 'Show' : 'Hide';
+          hideBtn.onclick = () => {
+            lines[idx].hidden = !lines[idx].hidden;
+            chrome.storage.sync.set({ lines }, () => {
+              injectContentScript();
+              renderLinesList();
+            });
+          };
+          // Remove button
+          const removeBtn = document.createElement('button');
+          removeBtn.textContent = 'Remove';
+          removeBtn.onclick = () => {
+            lines.splice(idx, 1);
+            chrome.storage.sync.set({ lines }, () => {
+              injectContentScript();
+              renderLinesList();
+            });
+          };
+          lineDiv.appendChild(hideBtn);
+          lineDiv.appendChild(removeBtn);
+          groupDiv.appendChild(lineDiv);
         });
-      };
-      lineDiv.appendChild(hideBtn);
-      lineDiv.appendChild(removeBtn);
-      listDiv.appendChild(lineDiv);
+      }
+      listDiv.appendChild(groupDiv);
     });
   });
 }
@@ -165,17 +241,6 @@ window.addEventListener('DOMContentLoaded', () => {
     const allHidden = lines.length > 0 && lines.every(line => line.hidden);
     toggleAllBtn.textContent = allHidden ? "👁️ Show All" : "🙈 Hide All";
   });
-});
-
-// Collapsible for added lines
-const toggleBtn = document.getElementById('toggleLinesList');
-const collapsibleContent = document.getElementById('collapsibleLinesList');
-let collapsed = false;
-
-toggleBtn.addEventListener('click', () => {
-  collapsed = !collapsed;
-  toggleBtn.classList.toggle('collapsed', collapsed);
-  collapsibleContent.classList.toggle('collapsed', collapsed);
 });
 
 // Call renderLinesList on popup open
