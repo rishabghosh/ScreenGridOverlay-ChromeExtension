@@ -164,19 +164,57 @@ function renderLinesList() {
           const lineDiv = document.createElement('div');
           lineDiv.className = 'line-item';
           lineDiv.draggable = true;
-          lineDiv.ondragstart = (e) => {
-            e.dataTransfer.setData('text/line-idx', idx);
-            e.dataTransfer.effectAllowed = 'move';
-            lineDiv.style.opacity = '0.5';
+          if (line.hidden) {
+            lineDiv.style.opacity = '0.4';
+            lineDiv.style.filter = 'grayscale(1)';
+          } else {
+            lineDiv.style.opacity = '';
+            lineDiv.style.filter = '';
+          }
+          // Overlay content container
+          const contentSpan = document.createElement('span');
+          contentSpan.innerHTML = `<span style="width:16px;height:16px;display:inline-block;background:${line.color};border-radius:2px;"></span> <span>${line.name ? line.name + ' - ' : ''}${line.type} @ ${line.position}px, ${line.thickness}px</span>`;
+          lineDiv.appendChild(contentSpan);
+          // Action buttons container
+          const actionsDiv = document.createElement('span');
+          actionsDiv.style.display = 'flex';
+          actionsDiv.style.gap = '4px'; // Slightly increase space between buttons
+          actionsDiv.style.marginLeft = 'auto';
+          actionsDiv.style.alignItems = 'center';
+          actionsDiv.style.background = 'none';
+          actionsDiv.style.boxShadow = 'none';
+          actionsDiv.style.padding = '0';
+          // Rename overlay button
+          const renameOverlayBtn = document.createElement('button');
+          renameOverlayBtn.innerHTML = '<span title="Rename overlay" style="font-size:1.1em;">✏️</span>';
+          renameOverlayBtn.style.background = 'none';
+          renameOverlayBtn.style.border = '1px solid #444';
+          renameOverlayBtn.style.borderRadius = '5px';
+          renameOverlayBtn.style.cursor = 'pointer';
+          renameOverlayBtn.style.margin = '0';
+          renameOverlayBtn.style.padding = '2px 6px';
+          renameOverlayBtn.onclick = () => {
+            const newName = prompt('Rename overlay (for your reference):', line.name || '');
+            if (newName !== null) {
+              lines[idx].name = newName.trim();
+              chrome.storage.sync.set({ lines }, () => {
+                injectContentScript();
+                renderLinesList();
+              });
+            }
           };
-          lineDiv.ondragend = () => { lineDiv.style.opacity = ''; };
-          lineDiv.innerHTML = `
-            <span style="width:16px;height:16px;display:inline-block;background:${line.color};border-radius:2px;"></span>
-            <span>${line.type} @ ${line.position}px, ${line.thickness}px</span>
-          `;
-          // Hide/Show button
+          actionsDiv.appendChild(renameOverlayBtn);
+          // Hide/Show icon button
           const hideBtn = document.createElement('button');
-          hideBtn.textContent = line.hidden ? 'Show' : 'Hide';
+          hideBtn.innerHTML = line.hidden
+            ? '<span title="Show overlay" style="font-size:1.1em;">👁️</span>'
+            : '<span title="Hide overlay" style="font-size:1.1em;">🙈</span>';
+          hideBtn.style.background = 'none';
+          hideBtn.style.border = '1px solid #444';
+          hideBtn.style.borderRadius = '5px';
+          hideBtn.style.cursor = 'pointer';
+          hideBtn.style.margin = '0';
+          hideBtn.style.padding = '2px 6px';
           hideBtn.onclick = () => {
             lines[idx].hidden = !lines[idx].hidden;
             chrome.storage.sync.set({ lines }, () => {
@@ -184,9 +222,16 @@ function renderLinesList() {
               renderLinesList();
             });
           };
-          // Remove button
+          actionsDiv.appendChild(hideBtn);
+          // Remove icon button
           const removeBtn = document.createElement('button');
-          removeBtn.textContent = 'Remove';
+          removeBtn.innerHTML = '<span title="Remove overlay" style="font-size:1.1em;">🗑️</span>';
+          removeBtn.style.background = 'none';
+          removeBtn.style.border = '1px solid #444';
+          removeBtn.style.borderRadius = '5px';
+          removeBtn.style.cursor = 'pointer';
+          removeBtn.style.margin = '0';
+          removeBtn.style.padding = '2px 6px';
           removeBtn.onclick = () => {
             lines.splice(idx, 1);
             chrome.storage.sync.set({ lines }, () => {
@@ -194,8 +239,9 @@ function renderLinesList() {
               renderLinesList();
             });
           };
-          lineDiv.appendChild(hideBtn);
-          lineDiv.appendChild(removeBtn);
+          actionsDiv.appendChild(removeBtn);
+          // Add actions to far right
+          lineDiv.appendChild(actionsDiv);
           groupDiv.appendChild(lineDiv);
         });
       }
