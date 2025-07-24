@@ -65,6 +65,9 @@ function renderLinesList() {
   chrome.storage.sync.get(["lines", "groupVisibility"], (data) => {
     const lines = data.lines || [];
     const groupVisibility = data.groupVisibility || {};
+    // --- Add fold state for each group ---
+    if (!window.groupFoldState) window.groupFoldState = {};
+    const groupFoldState = window.groupFoldState;
     const listDiv = document.getElementById("linesList");
     listDiv.innerHTML = '';
     if (lines.length === 0) {
@@ -78,8 +81,6 @@ function renderLinesList() {
       if (!groups[group]) groups[group] = [];
       groups[group].push({ ...line, idx });
     });
-    // Remove the 'Added Lines' row/collapsible from the popup UI
-    // (No code needed here, just don't render any extra row above the groups)
     Object.keys(groups).forEach(groupName => {
       const groupDiv = document.createElement('div');
       groupDiv.style.marginBottom = '10px';
@@ -110,6 +111,19 @@ function renderLinesList() {
       groupNameSpan.textContent = groupName;
       groupNameSpan.style.marginRight = '8px';
       header.appendChild(groupNameSpan);
+      // --- Fold/Unfold button ---
+      const foldBtn = document.createElement('button');
+      const isFolded = groupFoldState[groupName] === true;
+      foldBtn.innerHTML = isFolded ? '<span title="Unfold group" style="font-size:1.1em;">▶️</span>' : '<span title="Fold group" style="font-size:1.1em;">▼</span>';
+      foldBtn.style.background = 'none';
+      foldBtn.style.border = 'none';
+      foldBtn.style.cursor = 'pointer';
+      foldBtn.style.marginRight = '4px';
+      foldBtn.onclick = () => {
+        groupFoldState[groupName] = !isFolded;
+        renderLinesList();
+      };
+      header.appendChild(foldBtn);
       // Rename icon button
       const renameBtn = document.createElement('button');
       renameBtn.innerHTML = '<span title="Rename group" style="font-size:1.1em;">✏️</span>';
@@ -144,19 +158,19 @@ function renderLinesList() {
       const toggleBtn = document.createElement('button');
       const visible = groupVisibility[groupName] !== false;
       toggleBtn.innerHTML = visible
-        ? '<span title="Hide group" style="font-size:1.1em;">🙈</span>'
-        : '<span title="Show group" style="font-size:1.1em;">👁️</span>';
+        ? '<span title="Hide group overlays" style="font-size:1.1em;">🙈</span>'
+        : '<span title="Show group overlays" style="font-size:1.1em;">👁️</span>';
       toggleBtn.style.background = 'none';
       toggleBtn.style.border = 'none';
       toggleBtn.style.cursor = 'pointer';
-      toggleBtn.onclick = () => {
-        // Toggle group visibility and update hidden property for all lines in the group
+      toggleBtn.onclick = (e) => {
+        e.stopPropagation(); // Prevent any accidental folding/unfolding
+        // Only show/hide overlays, do not fold/unfold list
         chrome.storage.sync.get(["lines", "groupVisibility"], (data) => {
           const lines = data.lines || [];
           const groupVisibility = data.groupVisibility || {};
           const newVisible = !visible;
           groupVisibility[groupName] = newVisible;
-          // Set hidden property for all lines in this group
           lines.forEach(line => {
             if ((line.group || 'Ungrouped') === groupName) {
               line.hidden = !newVisible;
@@ -170,8 +184,8 @@ function renderLinesList() {
       };
       header.appendChild(toggleBtn);
       groupDiv.appendChild(header);
-      // Always show all lines in visible groups
-      if (visible) {
+      // --- Only show overlays if not folded ---
+      if (!isFolded && visible) {
         groups[groupName].forEach(({ idx, ...line }) => {
           const lineDiv = document.createElement('div');
           lineDiv.className = 'line-item';
