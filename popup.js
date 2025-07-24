@@ -193,15 +193,96 @@ function renderLinesList() {
           renameOverlayBtn.style.cursor = 'pointer';
           renameOverlayBtn.style.margin = '0';
           renameOverlayBtn.style.padding = '2px 6px';
-          renameOverlayBtn.onclick = () => {
-            const newName = prompt('Rename overlay (for your reference):', line.name || '');
-            if (newName !== null) {
-              lines[idx].name = newName.trim();
+          renameOverlayBtn.onclick = (e) => {
+            e.preventDefault();
+            // Create a popup for renaming and group selection
+            const popup = document.createElement('div');
+            popup.style.position = 'fixed';
+            popup.style.left = Math.min(e.clientX, window.innerWidth - 320) + 'px';
+            popup.style.top = Math.min(e.clientY, window.innerHeight - 180) + 'px';
+            popup.style.background = '#23232b';
+            popup.style.color = '#fff';
+            popup.style.padding = '22px 26px 18px 26px';
+            popup.style.borderRadius = '14px';
+            popup.style.boxShadow = '0 8px 32px 0 #000c, 0 1.5px 8px #0006';
+            popup.style.zIndex = 99999;
+            popup.style.display = 'flex';
+            popup.style.flexDirection = 'column';
+            popup.style.gap = '14px';
+            popup.style.minWidth = '240px';
+            popup.style.maxWidth = '320px';
+            popup.style.fontSize = '1.08em';
+            // Name input
+            const nameInput = document.createElement('input');
+            nameInput.type = 'text';
+            nameInput.value = line.name || '';
+            nameInput.placeholder = 'Overlay name';
+            nameInput.style.padding = '6px 10px';
+            nameInput.style.borderRadius = '6px';
+            nameInput.style.border = '1px solid #444';
+            nameInput.style.background = '#181820';
+            nameInput.style.color = '#fff';
+            nameInput.style.fontSize = '1.08em';
+            nameInput.style.width = '100%';
+            // Group dropdown
+            const groupSelect = document.createElement('select');
+            Object.keys(groups).forEach(g => {
+              const opt = document.createElement('option');
+              opt.value = g;
+              opt.textContent = g;
+              if (g === line.group) opt.selected = true;
+              groupSelect.appendChild(opt);
+            });
+            groupSelect.style.padding = '6px 10px';
+            groupSelect.style.borderRadius = '6px';
+            groupSelect.style.border = '1px solid #444';
+            groupSelect.style.background = '#181820';
+            groupSelect.style.color = '#fff';
+            groupSelect.style.fontSize = '1.08em';
+            groupSelect.style.width = '100%';
+            // Save button
+            const saveBtn = document.createElement('button');
+            saveBtn.textContent = 'Save';
+            saveBtn.style.background = '#444';
+            saveBtn.style.color = '#fff';
+            saveBtn.style.border = 'none';
+            saveBtn.style.borderRadius = '6px';
+            saveBtn.style.padding = '7px 18px';
+            saveBtn.style.cursor = 'pointer';
+            saveBtn.style.fontWeight = 'bold';
+            saveBtn.style.boxShadow = '0 1px 4px #0002';
+            saveBtn.onclick = () => {
+              lines[idx].name = nameInput.value.trim();
+              lines[idx].group = groupSelect.value;
               chrome.storage.sync.set({ lines }, () => {
                 injectContentScript();
                 renderLinesList();
+                document.body.removeChild(popup);
               });
-            }
+            };
+            // Cancel button
+            const cancelBtn = document.createElement('button');
+            cancelBtn.textContent = 'Cancel';
+            cancelBtn.style.background = 'none';
+            cancelBtn.style.color = '#fff';
+            cancelBtn.style.border = '1px solid #444';
+            cancelBtn.style.borderRadius = '6px';
+            cancelBtn.style.padding = '7px 18px';
+            cancelBtn.style.cursor = 'pointer';
+            cancelBtn.style.boxShadow = '0 1px 4px #0002';
+            cancelBtn.onclick = () => document.body.removeChild(popup);
+            // Add to popup
+            popup.appendChild(nameInput);
+            popup.appendChild(groupSelect);
+            const btnRow = document.createElement('div');
+            btnRow.style.display = 'flex';
+            btnRow.style.gap = '8px';
+            btnRow.style.justifyContent = 'flex-end';
+            btnRow.appendChild(saveBtn);
+            btnRow.appendChild(cancelBtn);
+            popup.appendChild(btnRow);
+            document.body.appendChild(popup);
+            nameInput.focus();
           };
           actionsDiv.appendChild(renameOverlayBtn);
           // Hide/Show icon button
