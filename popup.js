@@ -83,6 +83,21 @@ function renderLinesList() {
     Object.keys(groups).forEach(groupName => {
       const groupDiv = document.createElement('div');
       groupDiv.style.marginBottom = '10px';
+      // Allow group to be a drop target
+      groupDiv.ondragover = (e) => { e.preventDefault(); groupDiv.style.background = '#3333'; };
+      groupDiv.ondragleave = () => { groupDiv.style.background = ''; };
+      groupDiv.ondrop = (e) => {
+        e.preventDefault();
+        groupDiv.style.background = '';
+        const lineIdx = e.dataTransfer.getData('text/line-idx');
+        if (lineIdx !== undefined && lines[lineIdx]) {
+          lines[lineIdx].group = groupName;
+          chrome.storage.sync.set({ lines }, () => {
+            injectContentScript();
+            renderLinesList();
+          });
+        }
+      };
       // Group header with icons
       const header = document.createElement('div');
       header.style.display = 'flex';
@@ -148,6 +163,13 @@ function renderLinesList() {
         groups[groupName].forEach(({ idx, ...line }) => {
           const lineDiv = document.createElement('div');
           lineDiv.className = 'line-item';
+          lineDiv.draggable = true;
+          lineDiv.ondragstart = (e) => {
+            e.dataTransfer.setData('text/line-idx', idx);
+            e.dataTransfer.effectAllowed = 'move';
+            lineDiv.style.opacity = '0.5';
+          };
+          lineDiv.ondragend = () => { lineDiv.style.opacity = ''; };
           lineDiv.innerHTML = `
             <span style="width:16px;height:16px;display:inline-block;background:${line.color};border-radius:2px;"></span>
             <span>${line.type} @ ${line.position}px, ${line.thickness}px</span>
